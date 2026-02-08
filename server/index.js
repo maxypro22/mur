@@ -1,12 +1,78 @@
 const express = require('express');
-const apiApp = require('./api/index.js');
-const localApp = express();
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
 
-// Mount the API on /api to match local dev expectations
-localApp.use('/api', apiApp);
+const app = express();
 
-const PORT = process.env.PORT || 5000;
-localApp.listen(PORT, () => {
-  console.log(`🚀 Local Development Server running on http://localhost:${PORT}`);
-  console.log(`📡 API endpoints mapped to http://localhost:${PORT}/api/*`);
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Database Connection with Serverless Optimization
+let cachedPromise = null;
+
+const connectDB = async () => {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+
+  if (!cachedPromise) {
+    cachedPromise = mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000
+    }).catch(err => {
+      console.error('MongoDB Connection Error:', err);
+      cachedPromise = null;
+      throw err;
+    });
+  }
+
+  return cachedPromise;
+};
+
+// Health Check Route - THIS MUST BE FIRST
+app.get('/', async (req, res) => {
+  let dbStatus = 'Disconnected';
+  let dbError = null;
+  let connectionDetails = {};
+
+  try {
+    await connectDB();
+    dbStatus = '✅ Connected Successfully';
+    connectionDetails = {
+      readyState: mongoose.connection.readyState,
+      host: mongoose.connection.host,
+      name: mongoose.connection.name
+    };
+  } catch (err) {
+    dbStatus = '❌ Connection Failed';
+    dbError = err.message;
+  }
+
+  res.status(200).json({
+    status: 'Server is running',
+    message: '🚀 Al Murqab Legal SaaS API',
+    database: {
+      status: dbStatus,
+      error: dbError,
+      details: connectionDetails
+    },
+    environment: {
+      mongoUri: process.env.MONGODB_URI ? '✅ Set' : '❌ Missing',
+      jwtSecret: process.env.JWT_SECRET ? '✅ Set' : '❌ Missing',
+      nodeEnv: process.env.NODE_ENV || 'development'
+    },
+    timestamp: new Date().toISOString(),
+    vercelRegion: process.env.VERCEL_REGION || 'local'
+  });
 });
+
+// API Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/cases', require('./routes/caseRoutes'));
+app.use('/api/finance', require('./routes/financeRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+
+// Export for Vercel
+module.exports = app;
