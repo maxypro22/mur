@@ -1,58 +1,52 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
+app.use(morgan('dev'));
 
-// CORS Configuration - Allow your Vercel frontend
-// CORS Configuration - Simplify for debugging
-// Allow all origins to fix connection issues
+// CORS Configuration
 app.use(cors({
   origin: '*',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  credentials: true
 }));
 
 app.use(express.json());
 
-// 1. Global Mongoose Settings - Disable buffering to prevent "Operation timed out"
-mongoose.set('bufferCommands', false);
-mongoose.set('serverSelectionTimeoutMS', 5000);
-
-// 2. Optimized Database Connection for Serverless (Vercel)
-let cached = global.mongoose;
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
+// Database Connection - Mirroring Working Reference Pattern
+let cachedPromise = null;
 
 const connectDB = async () => {
-  if (cached.conn) return cached.conn;
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
 
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-    console.log('📡 Connecting to MongoDB...');
-    cached.promise = mongoose.connect(process.env.MONGODB_URI, opts).then((mongoose) => {
-      console.log('✅ MongoDB Connected');
-      return mongoose;
+  if (!cachedPromise) {
+    // Use MONGO_URI (from reference) or MONGODB_URI (current)
+    const dbUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+    if (!dbUri) {
+      console.error('🔥 CRITICAL: Database URI is missing!');
+      throw new Error('Database URI missing');
+    }
+
+    console.log('📡 Connecting to MongoDB (Reference Pattern)...');
+    cachedPromise = mongoose.connect(dbUri, {
+      serverSelectionTimeoutMS: 5000
+      // Defaulting back to standard Mongoose buffering for stability
+    }).catch(err => {
+      console.error('❌ MongoDB Connection Error:', err);
+      cachedPromise = null; // Allow retry on next request
+      throw err;
     });
   }
 
-  try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
-  }
-  return cached.conn;
+  return cachedPromise;
 };
 
-// 3. Global Middleware - Ensure DB is connected BEFORE any route
+// Global Middleware - Ensure DB and Headers
 app.use(async (req, res, next) => {
-  // Disable caching for all API responses to ensure real-time data
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
@@ -61,8 +55,8 @@ app.use(async (req, res, next) => {
     await connectDB();
     next();
   } catch (err) {
-    console.error('🔥 DB Connection Error:', err.message);
-    res.status(503).json({ error: 'قاعدة البيانات غير متوفرة حالياً' });
+    console.error('🔥 Request Blocked - DB Failure:', err.message);
+    res.status(503).json({ error: 'قاعدة البيانات غير متوفرة', details: err.message });
   }
 });
 
