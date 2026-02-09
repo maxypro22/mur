@@ -26,9 +26,13 @@ const connectDB = async () => {
   }
 
   if (!cachedPromise) {
-    cachedPromise = mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000
-    }).catch(err => {
+    const opts = {
+      bufferCommands: false, // Disable Mongoose buffering
+      serverSelectionTimeoutMS: 20000, // Increase timeout to 20s
+      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    };
+
+    cachedPromise = mongoose.connect(process.env.MONGODB_URI, opts).catch(err => {
       console.error('MongoDB Connection Error:', err);
       cachedPromise = null;
       throw err;
