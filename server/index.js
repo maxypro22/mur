@@ -21,26 +21,26 @@ app.use(express.json());
 let cachedPromise = null;
 
 const connectDB = async () => {
-  // Force new connection if not connected
-  if (mongoose.connection.readyState !== 1) {
-    try {
-      const opts = {
-        bufferCommands: false,
-        serverSelectionTimeoutMS: 20000,
-        socketTimeoutMS: 45000,
-        family: 4
-      };
-
-      await mongoose.connect(process.env.MONGODB_URI, opts);
-      console.log('✅ New MongoDB Connection Established');
-      return mongoose.connection;
-    } catch (error) {
-      console.error('❌ MongoDB Connection Error:', error);
-      throw error;
-    }
+  if (cachedPromise) {
+    return cachedPromise;
   }
 
-  return mongoose.connection;
+  const opts = {
+    bufferCommands: false,
+    serverSelectionTimeoutMS: 5000, // Reduced to fail fast and retry if needed
+    family: 4
+  };
+
+  cachedPromise = mongoose.connect(process.env.MONGODB_URI, opts).then((mongoose) => {
+    console.log('✅ New MongoDB Connection');
+    return mongoose.connection;
+  }).catch(err => {
+    console.error('❌ MongoDB Connection Error:', err);
+    cachedPromise = null; // Clear cache on error
+    throw err;
+  });
+
+  return cachedPromise;
 };
 
 // Health Check Route - THIS MUST BE FIRST
