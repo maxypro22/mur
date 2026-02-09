@@ -21,24 +21,36 @@ app.use(express.json());
 let cachedPromise = null;
 
 const connectDB = async () => {
+  // If connection is ready, return it
   if (mongoose.connection.readyState === 1) {
     return mongoose.connection;
   }
 
-  if (!cachedPromise) {
-    const opts = {
-      bufferCommands: false, // Disable Mongoose buffering
-      serverSelectionTimeoutMS: 20000, // Increase timeout to 20s
-      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-      family: 4 // Force IPv4 to avoid Vercel IPv6 issues
-    };
-
-    cachedPromise = mongoose.connect(process.env.MONGODB_URI, opts).catch(err => {
-      console.error('MongoDB Connection Error:', err);
-      cachedPromise = null;
-      throw err;
-    });
+  // If we have a cached promise, wait for it
+  if (cachedPromise) {
+    // Check if the promise resolved to a disconnected connection
+    const conn = await cachedPromise;
+    if (conn.readyState === 1) {
+      return conn;
+    }
+    // If disconnected, clear cache and retry
+    cachedPromise = null;
   }
+
+  const opts = {
+    bufferCommands: false,
+    serverSelectionTimeoutMS: 20000,
+    socketTimeoutMS: 45000,
+    family: 4
+  };
+
+  cachedPromise = mongoose.connect(process.env.MONGODB_URI, opts).then((mongoose) => {
+    return mongoose.connection;
+  }).catch(err => {
+    console.error('MongoDB Connection Error:', err);
+    cachedPromise = null;
+    throw err;
+  });
 
   return cachedPromise;
 };
