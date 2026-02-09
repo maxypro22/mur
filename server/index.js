@@ -52,6 +52,11 @@ const connectDB = async () => {
 
 // 3. Global Middleware - Ensure DB is connected BEFORE any route
 app.use(async (req, res, next) => {
+  // Disable caching for all API responses to ensure real-time data
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
   try {
     await connectDB();
     next();
@@ -61,55 +66,13 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Health Check Route - THIS MUST BE FIRST
-app.get('/', async (req, res) => {
-  let dbStatus = 'Disconnected';
-  let dbError = null;
-  let connectionDetails = {};
-
-  try {
-    await connectDB();
-    dbStatus = '✅ Connected Successfully';
-    connectionDetails = {
-      readyState: mongoose.connection.readyState,
-      host: mongoose.connection.host,
-      name: mongoose.connection.name
-    };
-  } catch (err) {
-    dbStatus = '❌ Connection Failed';
-    dbError = err.message;
-  }
-
+// Health Check Route
+app.get('/', (req, res) => {
   res.status(200).json({
-    status: 'DONE OK ✅',
-    message: '🚀 Al Murqab Legal SaaS API - Fully Operational',
-    database: {
-      status: dbStatus,
-      error: dbError,
-      details: connectionDetails
-    },
-    environment: {
-      mongoUri: process.env.MONGODB_URI ? '✅ Set' : '❌ Missing',
-      jwtSecret: process.env.JWT_SECRET ? '✅ Set' : '❌ Missing',
-      nodeEnv: process.env.NODE_ENV || 'development'
-    },
-    timestamp: new Date().toISOString(),
-    vercelRegion: process.env.VERCEL_REGION || 'local'
+    status: 'OK',
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    timestamp: new Date().toISOString()
   });
-});
-
-// 4. Global Middleware to ensure DB connection
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (err) {
-    console.error('🔥 Global DB Connection Failure:', err);
-    res.status(503).json({
-      error: 'خدمة قاعدة البيانات غير متوفرة حالياً',
-      details: err.message
-    });
-  }
 });
 
 // API Routes
