@@ -17,39 +17,49 @@ app.use(cors({
 
 app.use(express.json());
 
-// Database Connection with Serverless Optimization
-let cachedPromise = null;
+// 1. Global Mongoose Settings - Disable buffering to prevent "Operation timed out"
+mongoose.set('bufferCommands', false);
+mongoose.set('serverSelectionTimeoutMS', 5000);
+
+// 2. Optimized Database Connection for Serverless (Vercel)
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
 const connectDB = async () => {
-  // 1. If we have a cached promise, checks if the connection is actually alive
-  if (cachedPromise) {
-    const conn = await cachedPromise;
-    if (conn.readyState === 1) {
-      return conn;
-    }
-    console.log('⚠️ Cached connection is not ready (State: ' + conn.readyState + '). Reconnecting...');
-    cachedPromise = null; // Invalidate cache
+  if (cached.conn) return cached.conn;
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+    console.log('📡 Connecting to MongoDB...');
+    cached.promise = mongoose.connect(process.env.MONGODB_URI, opts).then((mongoose) => {
+      console.log('✅ MongoDB Connected');
+      return mongoose;
+    });
   }
 
-  // 2. Clear buffers if any
-  const opts = {
-    bufferCommands: false,
-    serverSelectionTimeoutMS: 5000,
-    family: 4
-  };
-
-  // 3. Create new connection
-  cachedPromise = mongoose.connect(process.env.MONGODB_URI, opts).then((mongoose) => {
-    console.log('✅ New MongoDB Connection');
-    return mongoose.connection;
-  }).catch(err => {
-    console.error('❌ MongoDB Connection Error:', err);
-    cachedPromise = null;
-    throw err;
-  });
-
-  return cachedPromise;
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+  return cached.conn;
 };
+
+// 3. Global Middleware - Ensure DB is connected BEFORE any route
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('🔥 DB Connection Error:', err.message);
+    res.status(503).json({ error: 'قاعدة البيانات غير متوفرة حالياً' });
+  }
+});
 
 // Health Check Route - THIS MUST BE FIRST
 app.get('/', async (req, res) => {
