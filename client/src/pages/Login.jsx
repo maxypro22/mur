@@ -26,7 +26,7 @@ const Login = () => {
         <div className="auth-container">
             <div className="card auth-card">
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <h1 style={{ color: 'red', margin: 0, fontSize: '1.8rem', fontWeight: 800 }}>المرقاب للمحاماة والاستشارات القانونية</h1>
+                    <h1 style={{ color: 'var(--gold)', margin: 0, fontSize: '1.8rem', fontWeight: 800 }}>المرقاب للمحاماة والاستشارات القانونية</h1>
                     <p style={{ color: 'var(--text-muted)', marginTop: '12px', fontSize: '1rem' }}>نظام إدارة القانون المتكامل</p>
                 </div>
 
