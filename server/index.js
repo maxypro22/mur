@@ -30,6 +30,7 @@ const connectDB = async () => {
       bufferCommands: false, // Disable Mongoose buffering
       serverSelectionTimeoutMS: 20000, // Increase timeout to 20s
       socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+      family: 4 // Force IPv4 to avoid Vercel IPv6 issues
     };
 
     cachedPromise = mongoose.connect(process.env.MONGODB_URI, opts).catch(err => {
