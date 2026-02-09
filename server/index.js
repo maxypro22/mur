@@ -21,22 +21,30 @@ app.use(express.json());
 let cachedPromise = null;
 
 const connectDB = async () => {
+  // 1. If we have a cached promise, checks if the connection is actually alive
   if (cachedPromise) {
-    return cachedPromise;
+    const conn = await cachedPromise;
+    if (conn.readyState === 1) {
+      return conn;
+    }
+    console.log('⚠️ Cached connection is not ready (State: ' + conn.readyState + '). Reconnecting...');
+    cachedPromise = null; // Invalidate cache
   }
 
+  // 2. Clear buffers if any
   const opts = {
     bufferCommands: false,
-    serverSelectionTimeoutMS: 5000, // Reduced to fail fast and retry if needed
+    serverSelectionTimeoutMS: 5000,
     family: 4
   };
 
+  // 3. Create new connection
   cachedPromise = mongoose.connect(process.env.MONGODB_URI, opts).then((mongoose) => {
     console.log('✅ New MongoDB Connection');
     return mongoose.connection;
   }).catch(err => {
     console.error('❌ MongoDB Connection Error:', err);
-    cachedPromise = null; // Clear cache on error
+    cachedPromise = null;
     throw err;
   });
 
