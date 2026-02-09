@@ -9,7 +9,8 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://mur-ten.vercel.app',
+  'https://almurqab.vercel.app',
+  'https://mur-4m5m.vercel.app',
   process.env.CLIENT_URL
 ].filter(Boolean);
 
