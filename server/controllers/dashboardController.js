@@ -21,9 +21,10 @@ exports.getStats = async (req, res) => {
             caseCount,
             totalRevenue,
             totalPending,
-            recentActivity: [] // Placeholder for logs
+            recentActivity: []
         });
     } catch (error) {
-        res.status(500).send(error);
+        console.error('🔥 Dashboard Stats Error:', error);
+        res.status(500).send({ error: 'فشل جلب الإحصائيات', details: error.message });
     }
 };

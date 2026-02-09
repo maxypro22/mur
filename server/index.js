@@ -88,6 +88,20 @@ app.get('/', async (req, res) => {
   });
 });
 
+// 4. Global Middleware to ensure DB connection
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('🔥 Global DB Connection Failure:', err);
+    res.status(503).json({
+      error: 'خدمة قاعدة البيانات غير متوفرة حالياً',
+      details: err.message
+    });
+  }
+});
+
 // API Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/cases', require('./routes/caseRoutes'));
