@@ -41,16 +41,27 @@ exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
         console.log(`🔑 Login attempt for: ${email}`);
+
+        if (!email || !password) {
+            return res.status(400).send({ error: 'الرجاء إدخال البريد الإلكتروني وكلمة المرور' });
+        }
+
         const user = await User.findOne({ email });
 
         if (!user) {
             console.log('❌ User not found');
-            return res.status(401).send({ error: 'Invalid login credentials' });
+            return res.status(401).send({ error: 'بيانات الدخول غير صحيحة' });
         }
 
+        // Simple string comparison for now (Production: use bcrypt)
         if (user.password !== password) {
             console.log('❌ Password mismatch');
-            return res.status(401).send({ error: 'Invalid login credentials' });
+            return res.status(401).send({ error: 'بيانات الدخول غير صحيحة' });
+        }
+
+        if (!process.env.JWT_SECRET) {
+            console.error('🔥 CRITICAL ERROR: JWT_SECRET is not defined!');
+            throw new Error('Server configuration error');
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
@@ -58,7 +69,7 @@ exports.login = async (req, res) => {
         res.send({ user, token });
     } catch (error) {
         console.error('🔥 Login Error:', error);
-        res.status(400).send(error);
+        res.status(500).send({ error: error.message || 'حدث خطأ أثناء تسجيل الدخول' });
     }
 };
 
