@@ -32,6 +32,18 @@ const UserManagement = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            console.log('🚀 Attempting to save user...');
+            const token = localStorage.getItem('token');
+            if (token) {
+                console.log('✅ Token found:', token.substring(0, 10) + '...');
+            } else {
+                console.error('❌ No token found in localStorage!');
+                alert('خطأ: لم يتم العثور على رمز المصادقة. يرجى تسجيل الدخول مرة أخرى.');
+                return;
+            }
+
+            console.log('📦 Sending data:', formData);
+
             if (editingUserId) {
                 const updateData = { ...formData };
                 if (!updateData.password) delete updateData.password;
@@ -39,10 +51,14 @@ const UserManagement = () => {
             } else {
                 await api.post('/users', formData);
             }
+            console.log('✅ User saved successfully');
             setShowForm(false);
             fetchUsers();
         } catch (error) {
-            alert(error.response?.data?.error || 'فشل حفظ البيانات');
+            console.error('🔥 Save Error:', error.response?.data || error.message);
+            // Show detailed error if available
+            const msg = error.response?.data?.error || error.message || 'فشل حفظ البيانات';
+            alert(`خطأ: ${msg}`);
         }
     };
 
