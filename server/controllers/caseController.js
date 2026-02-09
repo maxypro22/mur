@@ -3,11 +3,24 @@ const Hearing = require('../models/Hearing');
 
 exports.createCase = async (req, res) => {
     try {
+        console.log('📝 Creating new case:', req.body);
+
+        if (!req.user || !req.user.lawFirmId) {
+            console.error('❌ Error: User or LawFirmId missing from request');
+            return res.status(400).send({ error: 'بيانات المكتب غير متوفرة' });
+        }
+
         const newCase = new Case({ ...req.body, lawFirmId: req.user.lawFirmId });
         await newCase.save();
+
+        console.log('✅ Case created successfully');
         res.status(201).send(newCase);
     } catch (error) {
-        res.status(400).send(error);
+        console.error('🔥 Create Case Error:', error);
+        res.status(400).send({
+            error: 'فشل حفظ القضية',
+            details: error.message
+        });
     }
 };
 
