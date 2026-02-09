@@ -72,8 +72,8 @@ app.get('/', async (req, res) => {
   }
 
   res.status(200).json({
-    status: 'Server is running',
-    message: '🚀 Al Murqab Legal SaaS API',
+    status: 'ALL DONE ✅',
+    message: '🚀 Al Murqab Legal SaaS API - Updated Successfully',
     database: {
       status: dbStatus,
       error: dbError,
