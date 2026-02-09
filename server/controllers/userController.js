@@ -2,7 +2,7 @@ const User = require('../models/User');
 
 exports.getUsers = async (req, res) => {
     try {
-        const users = await User.find({ lawFirmId: req.user.lawFirmId });
+        const users = await User.find({ lawFirmId: req.user.lawFirmId }).sort({ createdAt: -1 });
         res.send(users);
     } catch (error) {
         res.status(500).send({ error: 'فشل جلب قائمة المستخدمين', details: error.message });
@@ -27,7 +27,7 @@ exports.updateUser = async (req, res) => {
     try {
         console.log(`📝 Updating User: ${req.params.id}`);
         const updateData = { ...req.body };
-        delete updateData.lawFirmId;
+        delete updateData.lawFirmId; // Protect lawFirmId
 
         const user = await User.findOneAndUpdate(
             { _id: req.params.id, lawFirmId: req.user.lawFirmId },

@@ -202,7 +202,7 @@ const AdminDashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {(searchTerm ? filteredCases : cases.slice(0, 10)).map(c => (
+                            {(searchTerm ? filteredCases : cases).map(c => (
                                 <tr key={c._id}>
                                     <td style={{ fontWeight: 600 }}>{c.caseNumber}</td>
                                     <td>{c.clientName}</td>

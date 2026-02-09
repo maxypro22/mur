@@ -27,7 +27,7 @@ exports.createCase = async (req, res) => {
 exports.getCases = async (req, res) => {
     try {
         console.log(`🔍 Fetching cases for Firm: ${req.user.lawFirmId}`);
-        const cases = await Case.find({ lawFirmId: req.user.lawFirmId });
+        const cases = await Case.find({ lawFirmId: req.user.lawFirmId }).sort({ createdAt: -1 });
         res.send(cases);
     } catch (error) {
         console.error('🔥 Get Cases Error:', error);
@@ -52,9 +52,12 @@ exports.getCase = async (req, res) => {
 exports.updateCase = async (req, res) => {
     try {
         console.log(`📝 Updating Case: ${req.params.id}`);
+        const updateData = { ...req.body };
+        delete updateData.lawFirmId; // Protect lawFirmId from being overwritten
+
         const caseItem = await Case.findOneAndUpdate(
             { _id: req.params.id, lawFirmId: req.user.lawFirmId },
-            req.body,
+            updateData,
             { new: true, runValidators: true }
         );
         if (!caseItem) return res.status(404).send({ error: 'القضية غير موجودة للتعديل' });
