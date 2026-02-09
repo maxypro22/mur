@@ -1,19 +1,24 @@
 import axios from 'axios';
 
-// Ensure API URL always ends with /api
+// Helper to strip trailing slash
+const cleanUrl = (url) => url ? url.replace(/\/+$/, '') : '';
+
 const getBaseUrl = () => {
     let url = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    // Remove trailing slash if exists
-    url = url.replace(/\/$/, '');
-    // Append /api if not present
+    url = cleanUrl(url);
+
+    // Ensure it ends with /api
     if (!url.endsWith('/api')) {
         url += '/api';
     }
     return url;
 };
 
+const BASE_URL = getBaseUrl();
+console.log(`%c [API Config] Base URL: ${BASE_URL}`, 'background: #222; color: #bada55; font-size: 14px');
+
 const api = axios.create({
-    baseURL: getBaseUrl(),
+    baseURL: BASE_URL,
 });
 
 api.interceptors.request.use((config) => {

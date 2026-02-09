@@ -6,28 +6,13 @@ require('dotenv').config();
 const app = express();
 
 // CORS Configuration - Allow your Vercel frontend
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://almurqab.vercel.app',
-  'https://mur-4m5m.vercel.app',
-  process.env.CLIENT_URL
-].filter(Boolean);
-
+// CORS Configuration - Simplify for debugging
+// Allow all origins to fix connection issues
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.some(allowed => origin.startsWith(allowed.replace(/\/$/, '')))) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 app.use(express.json());
