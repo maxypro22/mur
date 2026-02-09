@@ -62,7 +62,9 @@ const LawyerDashboard = () => {
             setShowForm(false);
             fetchCases();
         } catch (error) {
-            alert('فشل حفظ البيانات');
+            console.error('🔥 Save Case Error:', error.response?.data || error.message);
+            const msg = error.response?.data?.error || error.response?.data?.details || error.message || 'فشل حفظ البيانات';
+            alert(`خطأ: ${msg}`);
         }
     };
 
