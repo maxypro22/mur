@@ -60,7 +60,9 @@ const AdminDashboard = () => {
             setShowEditForm(false);
             fetchData();
         } catch (error) {
-            alert('فشل تحديث البيانات');
+            console.error('🔥 Admin Update Error:', error.response?.data || error.message);
+            const msg = error.response?.data?.error || error.response?.data?.details || error.message || 'فشل تحديث البيانات';
+            alert(`خطأ: ${msg}`);
         }
     };
 

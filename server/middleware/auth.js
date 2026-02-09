@@ -13,6 +13,7 @@ const auth = async (req, res, next) => {
 
         req.token = token;
         req.user = user;
+        console.log(`👤 Auth - User: ${user.email}, Role: ${user.role}, FirmID: ${user.lawFirmId}`);
         next();
     } catch (error) {
         console.error('Authentication Error:', error.message);

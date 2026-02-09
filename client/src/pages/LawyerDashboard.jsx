@@ -19,6 +19,7 @@ const LawyerDashboard = () => {
     });
 
     useEffect(() => {
+        console.log('%c [Dashboard] Version: 1.2 - Logging Enabled', 'color: white; background: blue; padding: 2px 5px; border-radius: 3px');
         fetchCases();
     }, []);
 
