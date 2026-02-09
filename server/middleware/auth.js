@@ -15,6 +15,13 @@ const auth = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
+        console.error('Authentication Error:', error.message);
+        // If it helps debugging:
+        if (req.header('Authorization')) {
+            console.error('Token received (partial):', req.header('Authorization').substring(0, 20) + '...');
+        } else {
+            console.error('No Authorization header received');
+        }
         res.status(401).send({ error: 'Please authenticate.' });
     }
 };
