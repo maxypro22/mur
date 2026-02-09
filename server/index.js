@@ -73,8 +73,8 @@ app.get('/', async (req, res) => {
   }
 
   res.status(200).json({
-    status: 'ALL DONE ✅',
-    message: '🚀 Al Murqab Legal SaaS API - Updated Successfully',
+    status: 'DONE FOR U ✅',
+    message: '🚀 Al Murqab Legal SaaS API - CORS Fixed & Ready',
     database: {
       status: dbStatus,
       error: dbError,
