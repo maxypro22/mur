@@ -21,38 +21,26 @@ app.use(express.json());
 let cachedPromise = null;
 
 const connectDB = async () => {
-  // If connection is ready, return it
-  if (mongoose.connection.readyState === 1) {
-    return mongoose.connection;
-  }
+  // Force new connection if not connected
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      const opts = {
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 20000,
+        socketTimeoutMS: 45000,
+        family: 4
+      };
 
-  // If we have a cached promise, wait for it
-  if (cachedPromise) {
-    // Check if the promise resolved to a disconnected connection
-    const conn = await cachedPromise;
-    if (conn.readyState === 1) {
-      return conn;
+      await mongoose.connect(process.env.MONGODB_URI, opts);
+      console.log('✅ New MongoDB Connection Established');
+      return mongoose.connection;
+    } catch (error) {
+      console.error('❌ MongoDB Connection Error:', error);
+      throw error;
     }
-    // If disconnected, clear cache and retry
-    cachedPromise = null;
   }
 
-  const opts = {
-    bufferCommands: false,
-    serverSelectionTimeoutMS: 20000,
-    socketTimeoutMS: 45000,
-    family: 4
-  };
-
-  cachedPromise = mongoose.connect(process.env.MONGODB_URI, opts).then((mongoose) => {
-    return mongoose.connection;
-  }).catch(err => {
-    console.error('MongoDB Connection Error:', err);
-    cachedPromise = null;
-    throw err;
-  });
-
-  return cachedPromise;
+  return mongoose.connection;
 };
 
 // Health Check Route - THIS MUST BE FIRST
