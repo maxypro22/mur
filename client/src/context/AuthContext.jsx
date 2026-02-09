@@ -23,15 +23,17 @@ export const AuthProvider = ({ children }) => {
     }, [token, user]);
 
     const login = (userData, userToken) => {
+        localStorage.setItem('token', userToken);
+        localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
         setToken(userToken);
     };
 
     const logout = () => {
-        setUser(null);
-        setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        setUser(null);
+        setToken(null);
     };
 
     return (
