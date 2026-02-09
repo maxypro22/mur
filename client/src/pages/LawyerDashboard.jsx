@@ -174,6 +174,7 @@ const LawyerDashboard = () => {
                                 <th>الهاتف</th>
                                 <th>النوع</th>
                                 <th>المحكمة</th>
+                                <th>المحامي المسجل</th>
                                 <th>الحالة</th>
                                 <th>الإجراءات</th>
                             </tr>
@@ -186,6 +187,7 @@ const LawyerDashboard = () => {
                                     <td style={{ direction: 'ltr', textAlign: 'right' }}>{c.clientPhone || '---'}</td>
                                     <td>{c.type}</td>
                                     <td>{c.court || '---'}</td>
+                                    <td>{c.createdBy?.name || '---'}</td>
                                     <td>
                                         <span className={`badge ${c.status === 'adjourned' ? 'badge-warning' : c.status === 'closed' ? 'badge-success' : 'badge-danger'}`}>
                                             {c.status === 'new' ? 'جديدة' : c.status === 'adjourned' ? 'مؤجلة' : 'منتهية'}

@@ -10,7 +10,11 @@ exports.createCase = async (req, res) => {
             return res.status(400).send({ error: 'بيانات المكتب غير متوفرة' });
         }
 
-        const newCase = new Case({ ...req.body, lawFirmId: req.user.lawFirmId });
+        const newCase = new Case({
+            ...req.body,
+            lawFirmId: req.user.lawFirmId,
+            createdBy: req.user._id
+        });
         await newCase.save();
 
         console.log('✅ Case created successfully');
@@ -27,7 +31,9 @@ exports.createCase = async (req, res) => {
 exports.getCases = async (req, res) => {
     try {
         console.log(`🔍 Fetching cases for Firm: ${req.user.lawFirmId}`);
-        const cases = await Case.find({ lawFirmId: req.user.lawFirmId }).sort({ createdAt: -1 });
+        const cases = await Case.find({ lawFirmId: req.user.lawFirmId })
+            .populate('createdBy', 'name')
+            .sort({ createdAt: -1 });
         res.send(cases);
     } catch (error) {
         console.error('🔥 Get Cases Error:', error);
@@ -38,7 +44,8 @@ exports.getCases = async (req, res) => {
 exports.getCase = async (req, res) => {
     try {
         console.log(`📖 Getting Case: ${req.params.id}`);
-        const caseItem = await Case.findOne({ _id: req.params.id, lawFirmId: req.user.lawFirmId });
+        const caseItem = await Case.findOne({ _id: req.params.id, lawFirmId: req.user.lawFirmId })
+            .populate('createdBy', 'name');
         if (!caseItem) return res.status(404).send({ error: 'القضية غير موجودة' });
 
         const hearings = await Hearing.find({ caseId: req.params.id });

@@ -197,6 +197,7 @@ const AdminDashboard = () => {
                                 <th>الموكل</th>
                                 <th>الهاتف</th>
                                 <th>النوع</th>
+                                <th>المحامي المسجل</th>
                                 <th>الحالة</th>
                                 <th>إجراءات</th>
                             </tr>
@@ -208,6 +209,7 @@ const AdminDashboard = () => {
                                     <td>{c.clientName}</td>
                                     <td style={{ direction: 'ltr', textAlign: 'right' }}>{c.clientPhone || '---'}</td>
                                     <td>{c.type}</td>
+                                    <td>{c.createdBy?.name || '---'}</td>
                                     <td>
                                         <span className={`badge ${c.status === 'adjourned' ? 'badge-warning' : c.status === 'closed' ? 'badge-success' : 'badge-danger'}`}>
                                             {c.status === 'new' ? 'جديدة' : c.status === 'adjourned' ? 'مؤجلة' : 'منتهية'}
