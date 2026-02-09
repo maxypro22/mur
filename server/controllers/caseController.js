@@ -30,6 +30,10 @@ exports.createCase = async (req, res) => {
 
 exports.getCases = async (req, res) => {
     try {
+        if (!req.user || !req.user.lawFirmId) {
+            console.error('❌ Error: User or LawFirmId missing during fetch');
+            return res.status(401).send({ error: 'جلسة العمل انتهت، يرجى تسجيل الدخول مجدداً' });
+        }
         console.log(`🔍 Fetching cases for Firm: ${req.user.lawFirmId}`);
         const cases = await Case.find({ lawFirmId: req.user.lawFirmId })
             .populate('createdBy', 'name')
@@ -106,6 +110,9 @@ exports.addHearing = async (req, res) => {
 
 exports.getHearings = async (req, res) => {
     try {
+        if (!req.user || !req.user.lawFirmId) {
+            return res.status(401).send({ error: 'جلسة العمل انتهت' });
+        }
         const hearings = await Hearing.find({ lawFirmId: req.user.lawFirmId }).populate('caseId').sort({ date: 1 });
         res.send(hearings);
     } catch (error) {

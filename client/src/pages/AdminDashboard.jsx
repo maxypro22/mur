@@ -19,17 +19,24 @@ const AdminDashboard = () => {
         caseNumber: '', clientName: '', clientPhone: '', type: '', court: '', status: 'new', memo: ''
     });
 
-    const fetchData = async () => {
+    const fetchData = async (force = false) => {
         setLoading(true);
+        if (force) {
+            console.log('🔄 Forced data refresh triggered...');
+        }
         try {
             const [statsRes, casesRes] = await Promise.all([
-                api.get('/dashboard/stats'),
-                api.get('/cases')
+                api.get('/dashboard/stats' + (force ? `?t=${Date.now()}` : '')),
+                api.get('/cases' + (force ? `?t=${Date.now()}` : ''))
             ]);
             setStats(statsRes.data);
             setCases(casesRes.data);
         } catch (error) {
             console.error('Failed to fetch data:', error);
+            if (error.response?.status === 401) {
+                alert('انتهت جلسة العمل، سيتم توجيهك لتسجيل الدخول');
+                window.location.href = '/login';
+            }
         }
         setLoading(false);
     };
@@ -89,9 +96,9 @@ const AdminDashboard = () => {
                     <h1 style={{ margin: 0 }}>لوحة إدارة النظام</h1>
                     <p style={{ color: '#9CA3AF', margin: '5px 0 0 0' }}>إحصائيات مباشرة وأداء المكتب</p>
                 </div>
-                <button onClick={fetchData} className="button-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', color: '#9CA3AF' }}>
+                <button onClick={() => fetchData(true)} className="button-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', color: '#9CA3AF' }}>
                     <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-                    تحديث البيانات
+                    تحديث البيانات (إجباري)
                 </button>
             </div>
 
@@ -237,6 +244,9 @@ const AdminDashboard = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+                <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.7rem', color: '#4B5563' }}>
+                    Admin Portal V1.4 - Real-time Enabled
                 </div>
             </div>
         </div>

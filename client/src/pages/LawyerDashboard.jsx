@@ -19,16 +19,19 @@ const LawyerDashboard = () => {
     });
 
     useEffect(() => {
-        console.log('%c [Dashboard] Version: 1.2 - Logging Enabled', 'color: white; background: blue; padding: 2px 5px; border-radius: 3px');
+        console.log('%c [Lawyer Dashboard] Version: 1.3 - UI Refined', 'color: white; background: blue; padding: 2px 5px; border-radius: 3px');
         fetchCases();
     }, []);
 
-    const fetchCases = async () => {
+    const fetchCases = async (force = false) => {
         try {
-            const { data } = await api.get('/cases');
+            const { data } = await api.get('/cases' + (force ? `?t=${Date.now()}` : ''));
             setCases(data);
         } catch (e) {
             console.error(e);
+            if (e.response?.status === 401) {
+                window.location.href = '/login';
+            }
         }
     };
 
@@ -81,10 +84,16 @@ const LawyerDashboard = () => {
                     <h1 style={{ margin: 0 }}>نظرة عامة على القضايا</h1>
                     <p style={{ color: '#9CA3AF', margin: '5px 0 0 0' }}>متابعة القضايا والجلسات النشطة</p>
                 </div>
-                <button onClick={handleOpenCreate} className="button-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Plus size={18} />
-                    <span>إضافة قضية جديدة</span>
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => fetchCases(true)} className="button-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', color: '#9CA3AF' }}>
+                        <RefreshCw size={18} />
+                        تحديث
+                    </button>
+                    <button onClick={handleOpenCreate} className="button-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Plus size={18} />
+                        <span>إضافة قضية جديدة</span>
+                    </button>
+                </div>
             </div>
 
             <div className="grid" style={{ marginBottom: '2rem' }}>
@@ -214,6 +223,9 @@ const LawyerDashboard = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+                <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.7rem', color: '#4B5563' }}>
+                    Dashboard V1.4 - Live Sync Ready
                 </div>
             </div>
         </div>
