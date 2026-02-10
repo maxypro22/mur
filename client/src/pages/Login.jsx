@@ -59,7 +59,7 @@ const Login = () => {
                 </form>
 
                 <div style={{ marginTop: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-                    ليس لديك حساب؟ <Link to="/register" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>سجل مكتبك الآن</Link>
+                    نظام المرقاب لإدارة مكاتب المحاماة
                 </div>
             </div>
         </div>

@@ -34,8 +34,17 @@ exports.getCases = async (req, res) => {
             console.error('❌ Error: User or LawFirmId missing during fetch');
             return res.status(401).send({ error: 'جلسة العمل انتهت، يرجى تسجيل الدخول مجدداً' });
         }
-        console.log(`🔍 Fetching cases for Firm: ${req.user.lawFirmId}`);
-        const cases = await Case.find({ lawFirmId: req.user.lawFirmId })
+
+        console.log(`🔍 Fetching cases for Firm: ${req.user.lawFirmId} (Role: ${req.user.role})`);
+
+        let query = { lawFirmId: req.user.lawFirmId };
+
+        // RBAC: Lawyers only see their own cases
+        if (req.user.role === 'Lawyer') {
+            query.createdBy = req.user._id;
+        }
+
+        const cases = await Case.find(query)
             .populate('createdBy', 'name')
             .sort({ createdAt: -1 });
         res.send(cases);
@@ -48,9 +57,16 @@ exports.getCases = async (req, res) => {
 exports.getCase = async (req, res) => {
     try {
         console.log(`📖 Getting Case: ${req.params.id}`);
-        const caseItem = await Case.findOne({ _id: req.params.id, lawFirmId: req.user.lawFirmId })
+        let query = { _id: req.params.id, lawFirmId: req.user.lawFirmId };
+
+        // RBAC: Lawyers can only get their own cases
+        if (req.user.role === 'Lawyer') {
+            query.createdBy = req.user._id;
+        }
+
+        const caseItem = await Case.findOne(query)
             .populate('createdBy', 'name');
-        if (!caseItem) return res.status(404).send({ error: 'القضية غير موجودة' });
+        if (!caseItem) return res.status(404).send({ error: 'القضية غير موجودة أو ليس لديك صلاحية الوصول إليها' });
 
         const hearings = await Hearing.find({ caseId: req.params.id });
         res.send({ caseItem, hearings });
@@ -65,13 +81,21 @@ exports.updateCase = async (req, res) => {
         console.log(`📝 Updating Case: ${req.params.id}`);
         const updateData = { ...req.body };
         delete updateData.lawFirmId; // Protect lawFirmId from being overwritten
+        delete updateData.createdBy; // Protect ownership
+
+        let query = { _id: req.params.id, lawFirmId: req.user.lawFirmId };
+
+        // RBAC: Lawyers can only update their own cases
+        if (req.user.role === 'Lawyer') {
+            query.createdBy = req.user._id;
+        }
 
         const caseItem = await Case.findOneAndUpdate(
-            { _id: req.params.id, lawFirmId: req.user.lawFirmId },
+            query,
             updateData,
             { new: true, runValidators: true }
         );
-        if (!caseItem) return res.status(404).send({ error: 'القضية غير موجودة للتعديل' });
+        if (!caseItem) return res.status(404).send({ error: 'القضية غير موجودة أو ليس لديك صلاحية لتعديلها' });
 
         console.log('✅ Case updated successfully');
         res.send(caseItem);
@@ -84,10 +108,19 @@ exports.updateCase = async (req, res) => {
 exports.deleteCase = async (req, res) => {
     try {
         console.log(`🗑️ Deleting Case: ${req.params.id}`);
-        const caseItem = await Case.findOneAndDelete({ _id: req.params.id, lawFirmId: req.user.lawFirmId });
+        let query = { _id: req.params.id, lawFirmId: req.user.lawFirmId };
+
+        // RBAC: Lawyers can only delete their own cases
+        if (req.user.role === 'Lawyer') {
+            query.createdBy = req.user._id;
+        }
+
+        const caseItem = await Case.findOneAndDelete(query);
         if (caseItem) {
             await Hearing.deleteMany({ caseId: req.params.id });
             console.log('✅ Case and related hearings deleted');
+        } else {
+            return res.status(404).send({ error: 'القضية غير موجودة أو ليس لديك صلاحية لحذفها' });
         }
         res.send({ message: 'تم حذف القضية بنجاح' });
     } catch (error) {
