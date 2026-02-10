@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { Gavel, Plus, Clock, CheckCircle, ExternalLink, Edit2, X, Save, Search } from 'lucide-react';
+import { Gavel, Plus, Clock, CheckCircle, ExternalLink, Edit2, X, Save, Search, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const LawyerDashboard = () => {
@@ -19,7 +19,7 @@ const LawyerDashboard = () => {
     });
 
     useEffect(() => {
-        console.log('%c [Lawyer Dashboard] Version: 1.3 - UI Refined', 'color: white; background: blue; padding: 2px 5px; border-radius: 3px');
+        console.log('%c [Lawyer Dashboard] Version: 1.5 - Fix Import', 'color: white; background: blue; padding: 2px 5px; border-radius: 3px');
         fetchCases();
     }, []);
 
@@ -225,7 +225,7 @@ const LawyerDashboard = () => {
                     </table>
                 </div>
                 <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.7rem', color: '#4B5563' }}>
-                    Dashboard V1.4 - Live Sync Ready
+                    Dashboard V1.5 - Import Fix Live
                 </div>
             </div>
         </div>
