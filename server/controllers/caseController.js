@@ -132,7 +132,12 @@ exports.deleteCase = async (req, res) => {
 exports.addHearing = async (req, res) => {
     try {
         console.log('📅 Adding new hearing:', req.body);
-        const hearing = new Hearing({ ...req.body, lawFirmId: req.user.lawFirmId });
+        const hearing = new Hearing({
+            ...req.body,
+            lawFirmId: req.user.lawFirmId,
+            createdBy: req.user._id,
+            showInAgenda: true
+        });
         await hearing.save();
         res.status(201).send(hearing);
     } catch (error) {
@@ -146,7 +151,18 @@ exports.getHearings = async (req, res) => {
         if (!req.user || !req.user.lawFirmId) {
             return res.status(401).send({ error: 'جلسة العمل انتهت' });
         }
-        const hearings = await Hearing.find({ lawFirmId: req.user.lawFirmId }).populate('caseId').sort({ date: 1 });
+
+        let query = { lawFirmId: req.user.lawFirmId, showInAgenda: true };
+
+        // RBAC: Lawyers only see their own hearings in agenda
+        if (req.user.role === 'Lawyer') {
+            query.createdBy = req.user._id;
+        }
+
+        const hearings = await Hearing.find(query)
+            .populate('caseId')
+            .populate('createdBy', 'name')
+            .sort({ date: 1 });
         res.send(hearings);
     } catch (error) {
         res.status(500).send({ error: 'فشل جلب الجلسات', details: error.message });
@@ -168,9 +184,15 @@ exports.updateHearing = async (req, res) => {
 
 exports.deleteHearing = async (req, res) => {
     try {
-        await Hearing.findOneAndDelete({ _id: req.params.id, lawFirmId: req.user.lawFirmId });
-        res.send({ message: 'تم حذف الجلسة بنجاح' });
+        // Soft delete: Just hide from agenda, don't remove from DB
+        const hearing = await Hearing.findOneAndUpdate(
+            { _id: req.params.id, lawFirmId: req.user.lawFirmId },
+            { showInAgenda: false },
+            { new: true }
+        );
+        if (!hearing) return res.status(404).send({ error: 'الجلسة غير موجودة' });
+        res.send({ message: 'تمت إزالة الجلسة من الأجندة بنجاح' });
     } catch (error) {
-        res.status(500).send({ error: 'فشل حذف الجلسة', details: error.message });
+        res.status(500).send({ error: 'فشل إزالة الجلسة', details: error.message });
     }
 };

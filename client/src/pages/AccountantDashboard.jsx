@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { DollarSign, FileText, Plus, Check, Edit2, Trash2, X, Save } from 'lucide-react';
+import { DollarSign, FileText, Plus, Check, Edit2, Trash2, X, Save, Search } from 'lucide-react';
 
 const AccountantDashboard = () => {
     const [invoices, setInvoices] = useState([]);
     const [cases, setCases] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [editingInvoiceId, setEditingInvoiceId] = useState(null);
     const [formData, setFormData] = useState({ caseId: '', amount: '', description: '', dueDate: '', status: 'pending' });
@@ -147,12 +148,26 @@ const AccountantDashboard = () => {
             )}
 
             <div className="card">
-                <h3>سجل الفواتير</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                    <h3 style={{ margin: 0 }}>سجل الفواتير</h3>
+                    <div style={{ position: 'relative', width: '300px' }}>
+                        <input
+                            placeholder="بحث برقم القضية أو الموكل..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="input-field"
+                            style={{ marginBottom: 0, paddingRight: '40px' }}
+                        />
+                        <Search size={18} style={{ position: 'absolute', right: '12px', top: '12px', color: '#9CA3AF' }} />
+                    </div>
+                </div>
                 <div className="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>رقم القضية</th>
+                                <th>الموكل</th>
+                                <th>الهاتف</th>
                                 <th>الوصف</th>
                                 <th>المبلغ</th>
                                 <th>الحالة</th>
@@ -161,9 +176,14 @@ const AccountantDashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {invoices.map(i => (
+                            {invoices.filter(i =>
+                                (i.caseId?.caseNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                (i.caseId?.clientName || '').toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map(i => (
                                 <tr key={i._id}>
                                     <td style={{ fontWeight: 600 }}>{i.caseId?.caseNumber || '---'}</td>
+                                    <td>{i.caseId?.clientName || '---'}</td>
+                                    <td style={{ direction: 'ltr', textAlign: 'right' }}>{i.caseId?.clientPhone || '---'}</td>
                                     <td>{i.description}</td>
                                     <td>{i.amount.toLocaleString()} ر.ق</td>
                                     <td>
@@ -191,7 +211,7 @@ const AccountantDashboard = () => {
                             ))}
                             {invoices.length === 0 && (
                                 <tr>
-                                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: '#9CA3AF' }}>لا يوجد فواتير مسجلة حالياً</td>
+                                    <td colSpan="8" style={{ textAlign: 'center', padding: '2rem', color: '#9CA3AF' }}>لا يوجد فواتير مسجلة حالياً</td>
                                 </tr>
                             )}
                         </tbody>

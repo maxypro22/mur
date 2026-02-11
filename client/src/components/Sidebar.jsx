@@ -36,7 +36,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     return (
         <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <div className="sidebar-brand" style={{ marginBottom: 0, textAlign: 'right', fontSize: '1.3rem' }}>المرقاب</div>
+                <div className="sidebar-brand" style={{ marginBottom: 0, textAlign: 'right', fontSize: '1.3rem' }}>المرقاب للمحاماة</div>
                 <button
                     onClick={onClose}
                     style={{

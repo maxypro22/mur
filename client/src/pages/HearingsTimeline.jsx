@@ -46,12 +46,12 @@ const HearingsTimeline = () => {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('هل أنت متأكد من رغبتك في حذف هذه الجلسة؟')) {
+        if (window.confirm('هل أنت متأكد من رغبتك في إزالة هذه الجلسة من الأجندة؟ (ستبقى موجودة في سجل القضية)')) {
             try {
                 await api.delete(`/cases/hearings/${id}`);
                 fetchHearings();
             } catch (error) {
-                alert('فشل حذف الجلسة');
+                alert('فشل إزالة الجلسة');
             }
         }
     };
@@ -125,6 +125,9 @@ const HearingsTimeline = () => {
                                         {h.result}
                                     </p>
                                 )}
+                                <p style={{ margin: '10px 0 0 0', fontSize: '0.8rem', color: 'var(--accent)', opacity: 0.8 }}>
+                                    تسجيل: {h.createdBy?.name || '---'}
+                                </p>
                             </div>
                         </div>
 
@@ -133,7 +136,7 @@ const HearingsTimeline = () => {
                                 <button onClick={() => handleOpenEdit(h)} style={{ background: 'none', border: 'none', color: 'var(--gold)', cursor: 'pointer', padding: '5px' }} title="تعديل الجلسة">
                                     <Edit2 size={20} />
                                 </button>
-                                <button onClick={() => handleDelete(h._id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '5px' }} title="حذف الجلسة">
+                                <button onClick={() => handleDelete(h._id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '5px' }} title="إزالة من الأجندة">
                                     <Trash2 size={20} />
                                 </button>
                             </div>
