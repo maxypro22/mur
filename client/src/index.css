@@ -34,7 +34,7 @@
 body {
   margin: 0;
   font-family: 'Outfit', 'Inter', sans-serif;
-  font-size: 16px;
+  font-size: 18px;
   background-color: var(--bg);
   color: var(--text);
   line-height: 1.6;
