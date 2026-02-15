@@ -13,7 +13,8 @@ exports.createCase = async (req, res) => {
         const newCase = new Case({
             ...req.body,
             lawFirmId: req.user.lawFirmId,
-            createdBy: req.user._id
+            createdBy: req.user._id,
+            createdBy_name: req.user.name // Persist name
         });
         await newCase.save();
 
@@ -88,6 +89,15 @@ exports.updateCase = async (req, res) => {
         delete updateData.lawFirmId; // Protect lawFirmId from being overwritten
         delete updateData.createdBy; // Protect ownership
 
+        // If assigned lawyer is being updated, we should ideally fetch their name.
+        // For now, if assignedLawyer is in body, we assume the frontend might send name or we fetch it.
+        if (updateData.assignedLawyer) {
+            const lawyer = await User.findById(updateData.assignedLawyer);
+            if (lawyer) {
+                updateData.assignedLawyer_name = lawyer.name;
+            }
+        }
+
         let query = { _id: req.params.id, lawFirmId: req.user.lawFirmId };
 
         // RBAC: Lawyers can only update their own cases
@@ -141,6 +151,7 @@ exports.addHearing = async (req, res) => {
             ...req.body,
             lawFirmId: req.user.lawFirmId,
             createdBy: req.user._id,
+            createdBy_name: req.user.name, // Persist name
             showInAgenda: true
         });
         await hearing.save();

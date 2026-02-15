@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { Users, Gavel, TrendingUp, AlertCircle, RefreshCw, Edit2, ExternalLink, X, Save, Trash2, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
+    const { user: currentUser } = useAuth();
     const [stats, setStats] = useState({
         lawyerCount: 0,
         caseCount: 0,
@@ -91,7 +93,12 @@ const AdminDashboard = () => {
         <div>
             <div className="header-bar">
                 <div>
-                    <h1 style={{ margin: 0 }}>لوحة إدارة النظام</h1>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <h1 style={{ margin: 0 }}>لوحة إدارة النظام</h1>
+                        <span className={`badge ${currentUser?.role === 'Super Admin' ? 'badge-danger' : 'badge-success'}`} style={{ fontSize: '0.8rem' }}>
+                            {currentUser?.role === 'Super Admin' ? 'سوبر أدمن' : 'مدير نظام'}
+                        </span>
+                    </div>
                     <p style={{ color: '#9CA3AF', margin: '5px 0 0 0' }}>إحصائيات مباشرة وأداء المكتب</p>
                 </div>
                 <button onClick={() => fetchData(true)} className="button-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', color: '#9CA3AF' }}>
@@ -119,63 +126,69 @@ const AdminDashboard = () => {
                     <div style={{ color: '#9CA3AF', fontSize: '0.8rem' }}>جميع القضايا المسجلة</div>
                 </div>
 
-                <div className="stat-card" style={{ borderRight: '4px solid #10B981' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span className="stat-label">الإيرادات المحصلة</span>
-                        <TrendingUp size={20} color="#10B981" />
-                    </div>
-                    <div className="stat-value">{stats.totalRevenue.toLocaleString()} ر.ق</div>
-                    <div style={{ color: '#10B981', fontSize: '0.8rem' }}>الفواتير المسددة بالكامل</div>
-                </div>
-
-                <div className="stat-card" style={{ borderRight: '4px solid #EF4444' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span className="stat-label">مبالغ قيد الانتظار</span>
-                        <AlertCircle size={20} color="#EF4444" />
-                    </div>
-                    <div className="stat-value">{stats.totalPending.toLocaleString()} ر.ق</div>
-                    <div style={{ color: '#EF4444', fontSize: '0.8rem' }}>فواتير لم يتم تحصيلها</div>
-                </div>
-            </div>
-
-            {showEditForm && (
-                <div className="card" style={{ marginTop: '2rem', border: '1px solid #F59E0B' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ margin: 0 }}>تعديل بيانات القضية عبر الإدارة</h3>
-                        <button onClick={() => setShowEditForm(false)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>
-                            <X size={20} />
-                        </button>
-                    </div>
-                    <form onSubmit={handleUpdate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <input placeholder="رقم القضية" value={formData.caseNumber} onChange={e => setFormData({ ...formData, caseNumber: e.target.value })} className="input-field" required />
-                        <input placeholder="اسم الموكل" value={formData.clientName} onChange={e => setFormData({ ...formData, clientName: e.target.value })} className="input-field" required />
-                        <input placeholder="رقم هاتف الموكل" value={formData.clientPhone} onChange={e => setFormData({ ...formData, clientPhone: e.target.value })} className="input-field" />
-                        <input placeholder="نوع القضية" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })} className="input-field" required />
-                        <input placeholder="المحكمة" value={formData.court} onChange={e => setFormData({ ...formData, court: e.target.value })} className="input-field" />
-
-                        <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })} className="input-field" required>
-                            <option value="new">جديدة</option>
-                            <option value="adjourned">مؤجلة</option>
-                            <option value="closed">منتهية</option>
-                        </select>
-
-                        <div style={{ gridColumn: 'span 2' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#9CA3AF' }}>مذكرة القضية</label>
-                            <textarea
-                                placeholder="الملاحظات القانونية..."
-                                value={formData.memo}
-                                onChange={e => setFormData({ ...formData, memo: e.target.value })}
-                                className="input-field"
-                                style={{ minHeight: '100px', resize: 'vertical' }}
-                            />
+                {currentUser?.role === 'Super Admin' && (
+                    <>
+                        <div className="stat-card" style={{ borderRight: '4px solid #10B981' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span className="stat-label">الإيرادات المحصلة</span>
+                                <TrendingUp size={20} color="#10B981" />
+                            </div>
+                            <div className="stat-value">{stats.totalRevenue.toLocaleString()} ر.ق</div>
+                            <div style={{ color: '#10B981', fontSize: '0.8rem' }}>الفواتير المسددة بالكامل</div>
                         </div>
 
-                        <button type="submit" className="button-primary" style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                            <Save size={18} /> تحديث البيانات
-                        </button>
-                    </form>
-                </div>
-            )}
+                        <div className="stat-card" style={{ borderRight: '4px solid #EF4444' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span className="stat-label">مبالغ قيد الانتظار</span>
+                                <AlertCircle size={20} color="#EF4444" />
+                            </div>
+                            <div className="stat-value">{stats.totalPending.toLocaleString()} ر.ق</div>
+                            <div style={{ color: '#EF4444', fontSize: '0.8rem' }}>فواتير لم يتم تحصيلها</div>
+                        </div>
+                    </>
+                )}
+            </div>
+
+            {
+                showEditForm && (
+                    <div className="card" style={{ marginTop: '2rem', border: '1px solid #F59E0B' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ margin: 0 }}>تعديل بيانات القضية عبر الإدارة</h3>
+                            <button onClick={() => setShowEditForm(false)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <input placeholder="رقم القضية" value={formData.caseNumber} onChange={e => setFormData({ ...formData, caseNumber: e.target.value })} className="input-field" required />
+                            <input placeholder="اسم الموكل" value={formData.clientName} onChange={e => setFormData({ ...formData, clientName: e.target.value })} className="input-field" required />
+                            <input placeholder="رقم هاتف الموكل" value={formData.clientPhone} onChange={e => setFormData({ ...formData, clientPhone: e.target.value })} className="input-field" />
+                            <input placeholder="نوع القضية" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })} className="input-field" required />
+                            <input placeholder="المحكمة" value={formData.court} onChange={e => setFormData({ ...formData, court: e.target.value })} className="input-field" />
+
+                            <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })} className="input-field" required>
+                                <option value="new">جديدة</option>
+                                <option value="adjourned">مؤجلة</option>
+                                <option value="closed">منتهية</option>
+                            </select>
+
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#9CA3AF' }}>مذكرة القضية</label>
+                                <textarea
+                                    placeholder="الملاحظات القانونية..."
+                                    value={formData.memo}
+                                    onChange={e => setFormData({ ...formData, memo: e.target.value })}
+                                    className="input-field"
+                                    style={{ minHeight: '100px', resize: 'vertical' }}
+                                />
+                            </div>
+
+                            <button type="submit" className="button-primary" style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                                <Save size={18} /> تحديث البيانات
+                            </button>
+                        </form>
+                    </div>
+                )
+            }
 
             <div className="card" style={{ marginTop: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
@@ -227,7 +240,7 @@ const AdminDashboard = () => {
                                     <td>{c.clientName}</td>
                                     <td style={{ direction: 'ltr', textAlign: 'right' }}>{c.clientPhone || '---'}</td>
                                     <td>{c.type}</td>
-                                    <td>{c.createdBy?.name || '---'}</td>
+                                    <td>{c.createdBy_name || c.createdBy?.name || '---'}</td>
                                     <td>
                                         <span className={`badge ${c.status === 'adjourned' ? 'badge-warning' : c.status === 'closed' ? 'badge-success' : 'badge-danger'}`}>
                                             {c.status === 'new' ? 'جديدة' : c.status === 'adjourned' ? 'مؤجلة' : 'منتهية'}
@@ -260,7 +273,7 @@ const AdminDashboard = () => {
                     Admin Portal V1.4 - Real-time Enabled
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

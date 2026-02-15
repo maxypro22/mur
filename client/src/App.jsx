@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import LawyerDashboard from './pages/LawyerDashboard';
-import AccountantDashboard from './pages/AccountantDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import UserManagement from './pages/UserManagement';
 import CaseDetails from './pages/CaseDetails';
@@ -92,7 +91,6 @@ const AppRoutes = () => {
             <Route path="/lawyer" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Lawyer']}><LawyerDashboard /></ProtectedRoute>} />
             <Route path="/hearings" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Lawyer']}><HearingsTimeline /></ProtectedRoute>} />
             <Route path="/cases/:id" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Lawyer']}><CaseDetails /></ProtectedRoute>} />
-            <Route path="/accountant" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><AccountantDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><UserManagement /></ProtectedRoute>} />
             <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />

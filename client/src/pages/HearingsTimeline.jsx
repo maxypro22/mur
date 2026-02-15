@@ -148,7 +148,7 @@ const HearingsTimeline = () => {
                                     </p>
                                 )}
                                 <p style={{ margin: '10px 0 0 0', fontSize: '0.8rem', color: 'var(--accent)', opacity: 0.8 }}>
-                                    تسجيل: {h.createdBy?.name || '---'}
+                                    تسجيل: {h.createdBy_name || h.createdBy?.name || '---'}
                                 </p>
                             </div>
                         </div>

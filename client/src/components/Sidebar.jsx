@@ -24,9 +24,6 @@ const Sidebar = ({ isOpen, onClose }) => {
         Lawyer: [
             { name: 'قضاياي', path: '/lawyer', icon: Gavel },
             { name: 'أجندة الجلسات', path: '/hearings', icon: Calendar },
-        ],
-        Accountant: [
-            { name: 'الإدارة المالية', path: '/accountant', icon: CreditCard },
         ]
     };
 

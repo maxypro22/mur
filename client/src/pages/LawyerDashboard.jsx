@@ -211,7 +211,7 @@ const LawyerDashboard = () => {
                                     <td>{c.clientName}</td>
                                     <td style={{ direction: 'ltr', textAlign: 'right' }}>{c.clientPhone || '---'}</td>
                                     <td>{c.type}</td>
-                                    <td>{c.createdBy?.name || '---'}</td>
+                                    <td>{c.createdBy_name || c.createdBy?.name || '---'}</td>
                                     <td>{c.court || '---'}</td>
                                     <td>
                                         <span className={`badge ${c.status === 'adjourned' ? 'badge-warning' : c.status === 'closed' ? 'badge-success' : 'badge-danger'}`}>

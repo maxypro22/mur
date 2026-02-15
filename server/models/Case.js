@@ -9,7 +9,9 @@ const caseSchema = new mongoose.Schema({
     status: { type: String, enum: ['new', 'adjourned', 'closed'], default: 'new' },
     memo: { type: String },
     assignedLawyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    assignedLawyer_name: { type: String }, // Persist name even if user is deleted
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    createdBy_name: { type: String }, // Persist name even if user is deleted
     lawFirmId: { type: mongoose.Schema.Types.ObjectId, ref: 'LawFirm', required: true },
     createdAt: { type: Date, default: Date.now }
 });

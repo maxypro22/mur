@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { UserPlus, UserCheck, UserX, Edit2, Trash2, X, Save } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const UserManagement = () => {
+    const { user: currentUser } = useAuth();
     const [users, setUsers] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [editingUserId, setEditingUserId] = useState(null);
@@ -101,8 +103,9 @@ const UserManagement = () => {
                         <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="input-field" required>
                             <option value="Lawyer">محامي</option>
                             <option value="Admin">مدير (Admin)</option>
-                            <option value="Super Admin">سوبر أدمن (Super Admin)</option>
-                            <option value="Accountant">محاسب</option>
+                            {currentUser?.role === 'Super Admin' && (
+                                <option value="Super Admin">سوبر أدمن (Super Admin)</option>
+                            )}
                         </select>
                         <button type="submit" className="button-primary" style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
                             {editingUserId ? <Save size={18} /> : <UserPlus size={18} />}

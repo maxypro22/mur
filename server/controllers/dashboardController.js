@@ -9,8 +9,13 @@ exports.getStats = async (req, res) => {
         const [lawyerCount, caseCount, paidInvoices, pendingInvoices] = await Promise.all([
             User.countDocuments({ lawFirmId, role: 'Lawyer' }),
             Case.countDocuments({ lawFirmId }),
-            Invoice.find({ lawFirmId, status: 'paid' }),
-            Invoice.find({ lawFirmId, status: 'pending' })
+            // Only fetch invoices if Super Admin or Accountant (though Admin currently has access to dashboard/stats)
+            ['Super Admin', 'Accountant'].includes(req.user.role)
+                ? Invoice.find({ lawFirmId, status: 'paid' })
+                : Promise.resolve([]),
+            ['Super Admin', 'Accountant'].includes(req.user.role)
+                ? Invoice.find({ lawFirmId, status: 'pending' })
+                : Promise.resolve([])
         ]);
 
         const totalRevenue = paidInvoices.reduce((acc, inv) => acc + inv.amount, 0);
@@ -19,8 +24,8 @@ exports.getStats = async (req, res) => {
         res.send({
             lawyerCount,
             caseCount,
-            totalRevenue,
-            totalPending,
+            totalRevenue: ['Super Admin', 'Accountant'].includes(req.user.role) ? totalRevenue : 0,
+            totalPending: ['Super Admin', 'Accountant'].includes(req.user.role) ? totalPending : 0,
             recentActivity: []
         });
     } catch (error) {
