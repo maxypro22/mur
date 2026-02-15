@@ -23,7 +23,7 @@ exports.register = async (req, res) => {
             name: ownerName,
             email,
             password, // In production, hash this!
-            role: 'Admin',
+            role: 'Super Admin',
             lawFirmId: firm._id
         });
         await user.save();

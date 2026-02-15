@@ -100,7 +100,9 @@ const UserManagement = () => {
                         <input placeholder={editingUserId ? "كلمة المرور (اتركها فارغة للتغيير)" : "كلمة المرور"} type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="input-field" required={!editingUserId} />
                         <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="input-field" required>
                             <option value="Lawyer">محامي</option>
-                            <option value="Admin">مدير نظام (Admin)</option>
+                            <option value="Admin">مدير (Admin)</option>
+                            <option value="Super Admin">سوبر أدمن (Super Admin)</option>
+                            <option value="Accountant">محاسب</option>
                         </select>
                         <button type="submit" className="button-primary" style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
                             {editingUserId ? <Save size={18} /> : <UserPlus size={18} />}
@@ -128,8 +130,8 @@ const UserManagement = () => {
                                     <td style={{ fontWeight: 600 }}>{u.name}</td>
                                     <td>{u.email}</td>
                                     <td>
-                                        <span className={`badge ${u.role === 'Admin' ? 'badge-success' : 'badge-warning'}`}>
-                                            {u.role === 'Admin' ? 'مدير' : 'محامي'}
+                                        <span className={`badge ${u.role === 'Super Admin' ? 'badge-danger' : u.role === 'Admin' ? 'badge-success' : 'badge-warning'}`}>
+                                            {u.role === 'Super Admin' ? 'سوبر أدمن' : u.role === 'Admin' ? 'مدير' : 'محامي'}
                                         </span>
                                     </td>
                                     <td>{new Date(u.createdAt).toLocaleDateString('ar-EG')}</td>
