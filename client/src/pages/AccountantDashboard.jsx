@@ -10,14 +10,16 @@ const AccountantDashboard = () => {
     const [editingInvoiceId, setEditingInvoiceId] = useState(null);
     const [formData, setFormData] = useState({ caseId: '', amount: '', description: '', dueDate: '', status: 'pending' });
 
+    const [statusFilter, setStatusFilter] = useState('all');
+
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [statusFilter]);
 
     const fetchData = async () => {
         try {
             const [invRes, caseRes] = await Promise.all([
-                api.get('/finance/invoices'),
+                api.get(`/finance/invoices${statusFilter !== 'all' ? `?status=${statusFilter}` : ''}`),
                 api.get('/cases')
             ]);
             setInvoices(invRes.data);
@@ -150,15 +152,27 @@ const AccountantDashboard = () => {
             <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <h3 style={{ margin: 0 }}>سجل الفواتير</h3>
-                    <div style={{ position: 'relative', width: '300px' }}>
-                        <input
-                            placeholder="بحث برقم القضية أو الموكل..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
+                    <div style={{ display: 'flex', gap: '1rem', flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
+                        <select
+                            value={statusFilter}
+                            onChange={e => setStatusFilter(e.target.value)}
                             className="input-field"
-                            style={{ marginBottom: 0, paddingRight: '40px' }}
-                        />
-                        <Search size={18} style={{ position: 'absolute', right: '12px', top: '12px', color: '#9CA3AF' }} />
+                            style={{ marginBottom: 0, width: '150px' }}
+                        >
+                            <option value="all">عرض الكل</option>
+                            <option value="paid">المدفوعة فقط</option>
+                            <option value="pending">المعلقة فقط</option>
+                        </select>
+                        <div style={{ position: 'relative', width: '300px' }}>
+                            <input
+                                placeholder="بحث برقم القضية أو الموكل..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="input-field"
+                                style={{ marginBottom: 0, paddingRight: '40px' }}
+                            />
+                            <Search size={18} style={{ position: 'absolute', right: '12px', top: '12px', color: '#9CA3AF' }} />
+                        </div>
                     </div>
                 </div>
                 <div className="table-container">

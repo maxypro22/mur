@@ -2,7 +2,11 @@ const Invoice = require('../models/Invoice');
 
 exports.getInvoices = async (req, res) => {
     try {
-        const invoices = await Invoice.find({ lawFirmId: req.user.lawFirmId }).populate('caseId').sort({ createdAt: -1 });
+        let query = { lawFirmId: req.user.lawFirmId };
+        if (req.query.status && req.query.status !== 'all') {
+            query.status = req.query.status;
+        }
+        const invoices = await Invoice.find(query).populate('caseId').sort({ createdAt: -1 });
         res.send(invoices);
     } catch (error) {
         res.status(500).send({ error: 'فشل جلب الفواتير', details: error.message });

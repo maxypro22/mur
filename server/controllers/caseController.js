@@ -39,6 +39,11 @@ exports.getCases = async (req, res) => {
 
         let query = { lawFirmId: req.user.lawFirmId };
 
+        // Support status filtering
+        if (req.query.status && req.query.status !== 'all') {
+            query.status = req.query.status;
+        }
+
         // RBAC: Lawyers only see their own cases
         if (req.user.role === 'Lawyer') {
             query.createdBy = req.user._id;
@@ -153,6 +158,13 @@ exports.getHearings = async (req, res) => {
         }
 
         let query = { lawFirmId: req.user.lawFirmId, showInAgenda: true };
+
+        // Support date range filtering
+        if (req.query.startDate || req.query.endDate) {
+            query.date = {};
+            if (req.query.startDate) query.date.$gte = new Date(req.query.startDate);
+            if (req.query.endDate) query.date.$lte = new Date(req.query.endDate);
+        }
 
         // RBAC: Lawyers only see their own hearings in agenda
         if (req.user.role === 'Lawyer') {

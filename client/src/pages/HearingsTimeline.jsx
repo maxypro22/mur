@@ -8,13 +8,22 @@ const HearingsTimeline = () => {
     const [formData, setFormData] = useState({ date: '', time: '', court: '', result: '' });
     const [showEditForm, setShowEditForm] = useState(false);
 
+    const [dateRange, setDateRange] = useState({ start: '', end: '' });
+
     useEffect(() => {
         fetchHearings();
-    }, []);
+    }, [dateRange]);
 
     const fetchHearings = async () => {
         try {
-            const { data } = await api.get('/cases/hearings/all');
+            const { start, end } = dateRange;
+            let url = '/cases/hearings/all';
+            const params = new URLSearchParams();
+            if (start) params.append('startDate', start);
+            if (end) params.append('endDate', end);
+            if (params.toString()) url += `?${params.toString()}`;
+
+            const { data } = await api.get(url);
             setHearings(data);
         } catch (error) {
             console.error('Failed to fetch hearings:', error);
@@ -62,6 +71,19 @@ const HearingsTimeline = () => {
                 <div>
                     <h1 style={{ margin: 0 }}>أجندة الجلسات القادمة</h1>
                     <p style={{ color: 'var(--text-muted)', margin: '5px 0 0 0' }}>متابعة مواعيد المحاكم القادمة</p>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>من:</span>
+                        <input type="date" value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} className="input-field" style={{ marginBottom: 0, padding: '5px 10px' }} />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>إلى:</span>
+                        <input type="date" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} className="input-field" style={{ marginBottom: 0, padding: '5px 10px' }} />
+                    </div>
+                    {(dateRange.start || dateRange.end) && (
+                        <button onClick={() => setDateRange({ start: '', end: '' })} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '0.85rem' }}>مسح الفلتر</button>
+                    )}
                 </div>
             </div>
 

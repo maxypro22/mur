@@ -18,14 +18,13 @@ const LawyerDashboard = () => {
         memo: ''
     });
 
-    useEffect(() => {
-        console.log('%c [Lawyer Dashboard] Version: 1.5 - Fix Import', 'color: white; background: blue; padding: 2px 5px; border-radius: 3px');
-        fetchCases();
-    }, []);
+    const [statusFilter, setStatusFilter] = useState('all');
 
     const fetchCases = async (force = false) => {
         try {
-            const { data } = await api.get('/cases' + (force ? `?t=${Date.now()}` : ''));
+            const statusParam = statusFilter !== 'all' ? `?status=${statusFilter}` : '';
+            const tParam = force ? (statusParam ? `&t=${Date.now()}` : `?t=${Date.now()}`) : '';
+            const { data } = await api.get('/cases' + statusParam + tParam);
             setCases(data);
         } catch (e) {
             console.error(e);
@@ -34,6 +33,10 @@ const LawyerDashboard = () => {
             }
         }
     };
+
+    useEffect(() => {
+        fetchCases();
+    }, [statusFilter]);
 
     const handleOpenCreate = () => {
         setEditingCase(null);
@@ -163,15 +166,28 @@ const LawyerDashboard = () => {
             <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
                     <h3 style={{ margin: 0 }}>قائمة القضايا</h3>
-                    <div style={{ position: 'relative', width: '300px' }}>
-                        <input
-                            placeholder="بحث برقم القضية أو اسم الموكل..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <select
+                            value={statusFilter}
+                            onChange={e => setStatusFilter(e.target.value)}
                             className="input-field"
-                            style={{ marginBottom: 0, paddingRight: '40px' }}
-                        />
-                        <Search size={18} style={{ position: 'absolute', right: '12px', top: '12px', color: '#9CA3AF' }} />
+                            style={{ marginBottom: 0, width: '150px' }}
+                        >
+                            <option value="all">عرض الكل</option>
+                            <option value="new">جديدة</option>
+                            <option value="adjourned">مؤجلة</option>
+                            <option value="closed">منتهية</option>
+                        </select>
+                        <div style={{ position: 'relative', width: '300px' }}>
+                            <input
+                                placeholder="بحث برقم القضية أو اسم الموكل..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="input-field"
+                                style={{ marginBottom: 0, paddingRight: '40px' }}
+                            />
+                            <Search size={18} style={{ position: 'absolute', right: '12px', top: '12px', color: '#9CA3AF' }} />
+                        </div>
                     </div>
                 </div>
                 <div className="table-container">

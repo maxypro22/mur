@@ -8,16 +8,25 @@ const Sidebar = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
 
     const navItems = {
-        Admin: [
+        'Super Admin': [
             { name: 'لوحة التحكم', path: '/admin', icon: LayoutDashboard },
             { name: 'فريق العمل', path: '/users', icon: Users },
             { name: 'إدارة القضايا', path: '/lawyer', icon: Gavel },
             { name: 'أجندة الجلسات', path: '/hearings', icon: Calendar },
             { name: 'الإدارة المالية', path: '/accountant', icon: CreditCard },
         ],
+        Admin: [
+            { name: 'لوحة التحكم', path: '/admin', icon: LayoutDashboard },
+            { name: 'فريق العمل', path: '/users', icon: Users },
+            { name: 'إدارة القضايا', path: '/lawyer', icon: Gavel },
+            { name: 'أجندة الجلسات', path: '/hearings', icon: Calendar },
+        ],
         Lawyer: [
             { name: 'قضاياي', path: '/lawyer', icon: Gavel },
             { name: 'أجندة الجلسات', path: '/hearings', icon: Calendar },
+        ],
+        Accountant: [
+            { name: 'الإدارة المالية', path: '/accountant', icon: CreditCard },
         ]
     };
 

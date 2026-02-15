@@ -19,31 +19,29 @@ const AdminDashboard = () => {
         caseNumber: '', clientName: '', clientPhone: '', type: '', court: '', status: 'new', memo: ''
     });
 
+    const [statusFilter, setStatusFilter] = useState('all');
+
     const fetchData = async (force = false) => {
         setLoading(true);
-        if (force) {
-            console.log('🔄 Forced data refresh triggered...');
-        }
         try {
+            const statusParam = statusFilter !== 'all' ? `?status=${statusFilter}` : '';
+            const tParam = force ? (statusParam ? `&t=${Date.now()}` : `?t=${Date.now()}`) : '';
+
             const [statsRes, casesRes] = await Promise.all([
                 api.get('/dashboard/stats' + (force ? `?t=${Date.now()}` : '')),
-                api.get('/cases' + (force ? `?t=${Date.now()}` : ''))
+                api.get('/cases' + statusParam + tParam)
             ]);
             setStats(statsRes.data);
             setCases(casesRes.data);
         } catch (error) {
             console.error('Failed to fetch data:', error);
-            if (error.response?.status === 401) {
-                alert('انتهت جلسة العمل، سيتم توجيهك لتسجيل الدخول');
-                window.location.href = '/login';
-            }
         }
         setLoading(false);
     };
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [statusFilter]);
 
     const handleOpenEdit = (c) => {
         setEditingCaseId(c._id);
@@ -185,15 +183,28 @@ const AdminDashboard = () => {
                         <h3 style={{ margin: 0 }}>مراجعة وإدارة القضايا</h3>
                         <Link to="/lawyer" style={{ color: '#3B82F6', fontSize: '0.85rem' }}><ExternalLink size={14} /></Link>
                     </div>
-                    <div style={{ position: 'relative', width: '300px' }}>
-                        <input
-                            placeholder="بحث برقم القضية أو اسم الموكل..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <select
+                            value={statusFilter}
+                            onChange={e => setStatusFilter(e.target.value)}
                             className="input-field"
-                            style={{ marginBottom: 0, paddingRight: '40px' }}
-                        />
-                        <Search size={18} style={{ position: 'absolute', right: '12px', top: '12px', color: '#9CA3AF' }} />
+                            style={{ marginBottom: 0, width: '150px' }}
+                        >
+                            <option value="all">عرض الكل</option>
+                            <option value="new">جديدة</option>
+                            <option value="adjourned">مؤجلة</option>
+                            <option value="closed">منتهية</option>
+                        </select>
+                        <div style={{ position: 'relative', width: '300px' }}>
+                            <input
+                                placeholder="بحث برقم القضية أو اسم الموكل..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="input-field"
+                                style={{ marginBottom: 0, paddingRight: '40px' }}
+                            />
+                            <Search size={18} style={{ position: 'absolute', right: '12px', top: '12px', color: '#9CA3AF' }} />
+                        </div>
                     </div>
                 </div>
                 <div className="table-container">
