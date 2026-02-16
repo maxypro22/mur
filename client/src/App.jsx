@@ -9,6 +9,7 @@ import UserManagement from './pages/UserManagement';
 import CaseDetails from './pages/CaseDetails';
 import HearingsTimeline from './pages/HearingsTimeline';
 import ChangePassword from './pages/ChangePassword';
+import AccountantDashboard from './pages/AccountantDashboard';
 import Sidebar from './components/Sidebar';
 import { Bell, Sun, Moon, Menu, X } from 'lucide-react';
 import './index.css';
@@ -93,6 +94,7 @@ const AppRoutes = () => {
             <Route path="/cases/:id" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Lawyer']}><CaseDetails /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><UserManagement /></ProtectedRoute>} />
+            <Route path="/accountant" element={<ProtectedRoute allowedRoles={['Super Admin']}><AccountantDashboard /></ProtectedRoute>} />
             <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
             <Route path="/" element={
               ['Super Admin', 'Admin'].includes(user?.role) ? <Navigate to="/admin" /> :
