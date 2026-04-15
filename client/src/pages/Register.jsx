@@ -27,7 +27,7 @@ const Register = () => {
         <div className="auth-container" style={{ minHeight: '100vh', padding: '2rem' }}>
             <div className="card auth-card" style={{ maxWidth: '500px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <h1 style={{ color: '#FFFFFF', margin: 0, fontSize: '1.8rem', fontWeight: 800 }}>المرقاب للمحاماة والاستشارات القانونية</h1>
+                    <h1 style={{ color: 'var(--gold)', margin: 0, fontSize: '1.8rem', fontWeight: 800 }}>المرقاب للمحاماة والاستشارات القانونية</h1>
                     <p style={{ color: 'var(--text-muted)', marginTop: '12px', fontSize: '1rem' }}>انضم إلى المنصة وتحكم في مكتبك بذكاء</p>
                 </div>
 
